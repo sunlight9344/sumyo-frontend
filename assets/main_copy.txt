@@ -1,0 +1,310 @@
+import 'package:t1/page.dart';
+import 'package:t1/heart.dart';
+import 'package:t1/calendar.dart';
+import 'package:t1/profile.dart';
+import 'package:t1/menu_buttom.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:csv/csv.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter/cupertino.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(),
+      home: const MyHomePage(),
+      routes:{
+        '/calendar':(context) => CalendarScreen(),
+        '/heart':(context) => HeartScreen(),
+        '/profile':(context) => ProfileScreen(),
+      },
+      initialRoute: '/',
+    );
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key});
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+
+  List<Map<String, dynamic>> postList = [];
+  List<int> counters = [];
+
+  final int max_n = 5;
+
+  @override
+  void initState() {
+    super.initState();
+    loadCSVData();
+  }
+
+  void incrementCounter(int n) {
+    setState(() {
+      if (counters[n] < max_n) {
+        counters[n] += 1;
+      } else {
+        counters[n] = 0;
+      }
+    });
+  }
+
+  Future<void> loadCSVData() async {
+    final csvString = await rootBundle.loadString('assets/data_p.csv');
+    final csvParsed = CsvToListConverter().convert(csvString);
+
+    List<Map<String, dynamic>> tempList = [];
+    counters = List.filled(csvParsed.length, 0);
+
+    for (var i=0;i<csvParsed.length;i++) {
+      tempList.add({
+        'name': csvParsed[i][0],
+        'start': csvParsed[i][1].toString(),
+        'end': csvParsed[i][2].toString(),
+        'imageURL': csvParsed[i][3],
+        'cost': csvParsed[i][5].toString(),
+        'nn' : i,
+      });
+    }
+
+    setState(() {
+      postList = tempList;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Scaffold(
+    backgroundColor: Color(0xFFfdf8f8),
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            automaticallyImplyLeading: false,
+            title: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 70),
+                Text(
+                  'Cupo',
+                  style: TextStyle(
+                    color: Color(0xFFE08C88),
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                Container(
+                  margin: EdgeInsets.symmetric(vertical: 10),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: Colors.white,
+                      ),
+                      hintText: "Search...",
+                      hintStyle: TextStyle(color: Colors.white),
+                      fillColor: Colors.white,
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                    ),
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.white,
+            floating: true, // Make the app bar float
+            snap: true, // Snap the app bar into view when scrolling up
+          ),
+          SliverGrid(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 1,
+              crossAxisSpacing: 15.0,
+              mainAxisSpacing: 12.0,
+              childAspectRatio: 1 / 1.3,
+            ),
+            delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) {
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ScreenView(postList[index])),
+                    );
+                  },
+                  child: postContainer(
+                    title: postList[index]["name"] as String,
+                    imageURl: postList[index]["imageURL"] as String,
+                    start: postList[index]["start"] as String,
+                    end: postList[index]["end"] as String,
+                    cost: postList[index]["cost"] as String,
+                    nn: postList[index]["nn"],
+                  ),
+                );
+              },
+              childCount: postList.length,
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: MenuBottom(),
+    );
+  }
+
+  Container postContainer(
+      {required String title, required String imageURl, required String start,
+        required String end,required String cost,required int nn}) {
+    return Container(
+      height: 200,
+      child: Column(
+        children: [
+          Expanded(
+            child:Container(
+              padding: EdgeInsets.only(left:10,right:10,top:10),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.network(
+                  imageURl,
+                  fit: BoxFit.cover, // Adjust this as needed.
+                ),
+              ),
+            ),
+          ),
+          Container(
+
+            padding: EdgeInsets.all(20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.only(bottom:8),
+                      child:Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(bottom:5),
+                      child:Text(
+                        "부산시 금정구 장전동",
+                        style: TextStyle(
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(bottom:5),
+                      child:Text(
+                        start + "~" + end,
+                        style: TextStyle(
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      child:Text(
+                        "\₩ "+NumberFormat("#,##0").format(int.parse(cost)),
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                Column(
+                  //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      height:100,
+                      width:100,
+                      child: InkWell(
+                        onTap:() => incrementCounter(nn),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(0),
+                            border: Border.all(color: Color(0xFFE08C88), width: 3),
+                          ),
+                          child: Stack(
+                            children: [
+                              CustomPaint(
+                                painter: BoxFillPainter(counters[nn], max_n),
+                                child: Center(
+                                  child: Text(
+                                    '같이가요',
+                                    style: TextStyle(
+                                      fontSize: 17,
+                                      color: counters[nn] < 3 ? Colors.black : Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class BoxFillPainter extends CustomPainter {
+  int n;
+  int max_n;
+
+  BoxFillPainter(this.n, this.max_n);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    var paint = Paint();
+    paint.color = Colors.white;
+    var rect = Rect.fromLTWH(0, 0, size.width, size.height);
+    canvas.drawRect(rect, paint);
+
+    paint.color = Color(0xFFEFA8A7);
+    var filledHeight = (size.height / max_n) * n;
+    rect = Rect.fromLTWH(0, size.height - filledHeight, size.width, filledHeight);
+    canvas.drawRect(rect, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant BoxFillPainter oldDelegate) {
+    return oldDelegate.n != n;
+  }
+}

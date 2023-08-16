@@ -1,0 +1,84 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter_card_swiper/flutter_card_swiper.dart';
+import 'package:csv/csv.dart';
+import 'package:t1/menu_buttom.dart';
+
+class HeartScreen extends StatefulWidget {
+  HeartScreen({Key? key}) : super(key: key);
+
+  @override
+  _HeartScreenState createState() => _HeartScreenState();
+}
+
+class _HeartScreenState extends State<HeartScreen> {
+  List<String> postList = [];
+  List<Widget> cards = [];
+
+  @override
+  void initState() {
+    super.initState();
+    loadData();
+  }
+
+  Future<void> loadData() async {
+    String csvData = await rootBundle.loadString('assets/data_p.csv');
+    List<List<dynamic>> csvTable = CsvToListConverter().convert(csvData);
+
+    for (int i = 0; i < csvTable.length; i++) {
+      String imageURL = csvTable[i][3].toString();
+      postList.add(imageURL);
+      cards.add(Container(
+        alignment: Alignment.center,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Image.network(imageURL),
+        ),
+        color: Colors.transparent,
+      ));
+    }
+
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Scaffold(
+      backgroundColor: Color(0xFFfdf8f8),
+      bottomNavigationBar: MenuBottom(),
+      body: Column(
+        children: [
+          const SizedBox(height: 50),
+          Container(
+            height: 60,
+            alignment: Alignment.topLeft,
+            padding: EdgeInsets.only(left:40),
+            child: Text(
+              '가영 님!\n이런 문화 생활은 어떠세요?',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+
+              ),
+            ),
+          ),
+          Expanded(
+            child: postList.isEmpty
+                ? Center(child: CircularProgressIndicator())
+                : CardSwiper(
+              cardsCount: cards.length,
+              cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
+                return Container(
+                  key: ValueKey(index),
+                  child: cards[index],
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

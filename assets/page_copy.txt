@@ -1,0 +1,136 @@
+import 'package:flutter/material.dart';
+import 'package:t1/menu_buttom.dart';
+
+class ScreenView extends StatefulWidget {
+  final Map<String, dynamic> data;
+  const ScreenView(this.data, {Key? key}) : super(key: key);
+
+  @override
+  State<ScreenView> createState() => _ScreenViewState();
+}
+
+class _ScreenViewState extends State<ScreenView> {
+  @override
+  Widget build(BuildContext context) {
+    final String title = widget.data["name"];
+    final String start = widget.data["start"];
+    final String end = widget.data["end"];
+    final String cost = widget.data["cost"];
+    final String imageUrl = widget.data["imageURL"];
+
+    // Here, we get the height of the screen using MediaQuery
+    final double screenHeight = MediaQuery.of(context).size.height;
+
+    return Scaffold(
+      backgroundColor: Color(0xFFfdf8f8),
+      // appBar: AppBar(
+      //   toolbarHeight: 50,
+      //   title: const Text("상세 정보"),
+      //   leading: GestureDetector(
+      //     onTap: () => Navigator.pop(context),
+      //     child: const Icon(
+      //       Icons.arrow_back_ios,
+      //       size: 30,
+      //       color: Colors.white,
+      //     ),
+      //   ),
+      // ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 30),
+            Image.network(
+              width: double.infinity,
+              imageUrl,
+              // Here, we set the image height to be half of the screen height
+              height: screenHeight / 2.2,
+              fit: BoxFit.cover,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(20),
+
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      "부산시 금정구 장전동 192-11 sunlight villa",
+                      style: const TextStyle(
+                        fontSize: 15,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      start + "~" + end,
+                      style: const TextStyle(
+                        fontSize: 15,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      "상세정보라고할까요",
+                      style: const TextStyle(
+                        fontSize: 15,
+                      ),
+                    ),
+                    const SizedBox(height: 70),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                      Text(
+                      "가격 :   \₩ " + cost,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+
+                    ),
+                        Container(
+                          child:Row(
+                            children: [
+                              ElevatedButton(
+                                onPressed: () {
+                                  // Put your reservation onPressed code here
+                                },
+                                child: const Text('같이가요'),
+                                style:ElevatedButton.styleFrom(
+                                  primary: Colors.white,
+                                  onPrimary:Colors.black,
+                                )
+                              ),
+                              const SizedBox(width: 10),
+                              ElevatedButton(
+
+                                onPressed: () {
+                                  // Put your 같이가요 onPressed code here
+                                },
+                                child: const Text('예약하기'),
+                                  style:ElevatedButton.styleFrom(
+                                    primary: Color(0xFFE08C88),
+                                    onPrimary:Colors.white,
+                                  )
+                              ),
+                            ],
+                          ),
+                        )
+              ]
+                    )
+                  ],
+                ),
+            ),
+          ]
+        ),
+      ),
+      bottomNavigationBar: MenuBottom(),
+
+    );
+  }
+}
